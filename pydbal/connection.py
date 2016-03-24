@@ -82,6 +82,18 @@ class Connection:
     def __del__(self):
         self.close()
 
+    @staticmethod
+    def _get_default_sql_logger():
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.DEBUG)
+        handler.setFormatter(logging.Formatter(
+            "[%(levelname)1.1s %(asctime)s %(name)s:%(module)s:%(lineno)d] %(message)s",
+            "%y%m%d %H:%M:%S"))
+        logger = logging.getLogger("pydbal")
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(handler)
+        return logger
+
     def get_platform(self):
         return self._platform
 
@@ -116,18 +128,6 @@ class Connection:
 
     def get_sql_logger(self):
         return self._sql_logger
-
-    @staticmethod
-    def _get_default_sql_logger():
-        sql_logger = logging.getLogger("pydbal")
-        sql_logger.setLevel(logging.DEBUG)
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.DEBUG)
-        handler.setFormatter(logging.Formatter(
-            "[%(levelname)1.1s %(asctime)s %(name)s:%(module)s:%(lineno)d] %(message)s",
-            "%y%m%d %H:%M:%S"))
-        sql_logger.addHandler(handler)
-        return sql_logger
 
     def get_driver(self):
         return self._driver
