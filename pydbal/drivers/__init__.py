@@ -1,0 +1,120 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2016 Alexander Lokhman <alex.lokhman@gmail.com>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+from __future__ import absolute_import, division, print_function, with_statement
+
+from abc import ABCMeta, abstractmethod
+
+
+class BaseDriver:
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def __init__(self, **params):
+        pass
+
+    def __del__(self):
+        self.close()
+
+    @abstractmethod
+    def get_platform(self):
+        pass
+
+    def get_server_version(self):
+        info = self.get_server_version_info()
+        if info is not None:
+            return ".".join(map(str, info))
+
+    def get_server_version_info(self):
+        return None
+
+    @abstractmethod
+    def connect(self):
+        pass
+
+    @abstractmethod
+    def close(self):
+        pass
+
+    @abstractmethod
+    def clear(self):
+        pass
+
+    @abstractmethod
+    def is_connected(self):
+        pass
+
+    @abstractmethod
+    def error_code(self):
+        pass
+
+    @abstractmethod
+    def error_info(self):
+        pass
+
+    @abstractmethod
+    def execute(self, sql, *params):
+        pass
+
+    def execute_and_clear(self, sql, *params):
+        self.execute(sql, *params)
+        self.clear()
+
+    @abstractmethod
+    def iterate(self):
+        pass
+
+    @abstractmethod
+    def column_count(self):
+        pass
+
+    @abstractmethod
+    def row_count(self):
+        pass
+
+    @abstractmethod
+    def last_insert_id(self):
+        pass
+
+    @abstractmethod
+    def begin_transaction(self):
+        pass
+
+    @abstractmethod
+    def commit(self):
+        pass
+
+    @abstractmethod
+    def rollback(self):
+        pass
+
+    @staticmethod
+    def get_placeholder():
+        return "%s"
+
+    @abstractmethod
+    def escape_string(self, value):
+        pass
+
+    @abstractmethod
+    def get_name(self):
+        pass

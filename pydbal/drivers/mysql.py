@@ -1,0 +1,142 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2016 Alexander Lokhman <alex.lokhman@gmail.com>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+from __future__ import absolute_import, division, print_function, with_statement
+
+import MySQLdb
+import MySQLdb.cursors
+
+from . import BaseDriver
+from ..exception import DBALDriverError
+from ..platforms.mysql import MySQLPlatform
+
+
+class MySQLDriver(BaseDriver):
+    def __init__(self, host, user=None, password=None, database=None, port=3306, timeout=0, charset="utf8",
+                 timezone="+0:00", sql_mode="TRADITIONAL", **params):
+        self._sql_logger = params.pop("sql_logger")
+        self._platform = MySQLPlatform(self)
+
+        self._params = dict(
+            use_unicode=True, charset=charset, init_command=("SET time_zone = '%s'" % timezone),
+            connect_timeout=timeout, sql_mode=sql_mode, autocommit=params.pop("auto_commit"),
+            cursorclass=MySQLdb.cursors.SSCursor, **params)
+
+        if user is not None:
+            self._params["user"] = user
+        if password is not None:
+            self._params["passwd"] = password
+        if database is not None:
+            self._params["db"] = database
+
+        if "/" in host:
+            self._params["unix_socket"] = host
+        else:
+            self._params["host"] = host
+            self._params["port"] = int(port)
+
+        self._conn = None
+        self._cursor = None
+
+    def get_platform(self):
+        return self._platform
+
+    def get_server_version_info(self):
+        return getattr(self._conn, "_server_version", None)
+
+    def connect(self):
+        self.close()
+        try:
+            self._conn = MySQLdb.connect(**self._params)
+        except Exception as ex:
+            raise DBALDriverError.driver_exception(self, ex)
+
+    def close(self):
+        self.clear()
+        if getattr(self, "_conn", None) is not None:
+            self._conn.close()
+            self._conn = None
+
+    def clear(self):
+        if getattr(self, "_cursor", None) is not None:
+            self._cursor.close()
+            self._cursor = None
+
+    def is_connected(self):
+        return self._conn is not None
+
+    def error_code(self):
+        return self._conn.errno()
+
+    def error_info(self):
+        return self._conn.error()
+
+    def execute(self, sql, *params):
+        try:
+            self._cursor = self._get_cursor()
+            self._sql_logger.debug("%s %s", sql, params or "")
+            return self._cursor.execute(sql, params)
+        except Exception as ex:
+            raise DBALDriverError.execute_exception(self, ex, sql, params)
+
+    def _get_cursor(self):
+        try:
+            return self._conn.cursor()
+        except MySQLdb.OperationalError:
+            self.connect()
+            return self._get_cursor()
+
+    def iterate(self):
+        if self._cursor is None:
+            raise StopIteration
+
+        columns = [x[0] for x in self._cursor.description]
+        for row in self._cursor:
+            yield zip(columns, row)
+
+        self.clear()
+
+    def column_count(self):
+        return self._conn.field_count()
+
+    def row_count(self):
+        return self._conn.affected_rows()
+
+    def last_insert_id(self):
+        return self._conn.insert_id()
+
+    def begin_transaction(self):
+        self.execute_and_clear("START TRANSACTION")
+
+    def commit(self):
+        self._sql_logger.debug("COMMIT")
+        self._conn.commit()
+
+    def rollback(self):
+        self._sql_logger.debug("ROLLBACK")
+        self._conn.rollback()
+
+    def escape_string(self, value):
+        return self._conn.literal(value)
+
+    def get_name(self):
+        return "mysql"
