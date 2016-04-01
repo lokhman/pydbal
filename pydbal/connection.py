@@ -210,7 +210,7 @@ class Connection:
 
         :param sql: query to execute
         :param params: parameters iterable
-        :return: the result set as a Statement object
+        :return: result set as a Statement object
         :rtype: pydbal.statement.Statement
         """
         self._ensure_connected()
@@ -223,23 +223,29 @@ class Connection:
 
         :param sql: statement to execute
         :param params: parameters iterable
-        :return: the number of affected rows
+        :return: number of affected rows
         :rtype: int
         """
         self._ensure_connected()
         return Statement(self).execute(sql, params)
 
     def column_count(self):
-        """Returns number of columns for the most recent query.
+        """Returns the number of columns in the result set.
 
+        :return: number of columns in the result set; if there is no result set, this method should return `0`
         :rtype: int
         """
         self._ensure_connected()
         return self._driver.column_count()
 
     def row_count(self):
-        """Returns number of rows affected by the last query.
+        """Returns the number of rows affected by the last DELETE, INSERT, or UPDATE statement.
 
+        If the last executed SQL statement was a SELECT statement, some databases may return the number of rows returned
+        by that statement. However, this behaviour is not guaranteed for all databases and should not be relied on for
+        portable applications.
+
+        :return: number of rows
         :rtype: int
         """
         self._ensure_connected()
@@ -261,7 +267,7 @@ class Connection:
     def error_code(self):
         """Fetches the SQLSTATE associated with the last database operation.
 
-        :return: The last error code.
+        :return: the last error code
         :rtype: int
         """
         self._ensure_connected()
@@ -270,7 +276,7 @@ class Connection:
     def error_info(self):
         """Fetches extended error information associated with the last database operation.
 
-        :return: The last error information.
+        :return: the last error information
         """
         self._ensure_connected()
         return self._driver.error_info()

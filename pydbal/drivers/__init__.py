@@ -106,7 +106,7 @@ class BaseDriver:
         pass
 
     @abstractmethod
-    def last_insert_id(self):
+    def last_insert_id(self, seq_name=None):
         pass
 
     @abstractmethod

@@ -118,7 +118,7 @@ class MySQLDriver(BaseDriver):
     def row_count(self):
         return self._conn.affected_rows()
 
-    def last_insert_id(self):
+    def last_insert_id(self, seq_name=None):
         return self._conn.insert_id()
 
     def begin_transaction(self):

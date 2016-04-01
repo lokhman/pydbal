@@ -64,7 +64,7 @@ class SQLBuilder:
         return copy.copy(self)
 
     def expr(self):
-        return self._connection.expression_builder()
+        return self._connection.get_expression_builder()
 
     def get_type(self):
         return self._type
