@@ -244,7 +244,8 @@ class SQLBuilder:
     def reset_sql_parts(self, sql_part_names=None):
         if sql_part_names is None:
             sql_part_names = self._sql_parts.keys()
-        map(self.reset_sql_part, sql_part_names)
+        for sql_part_name in sql_part_names:
+            self.reset_sql_part(sql_part_name)
         return self
 
     def reset_sql_part(self, sql_part_name):
@@ -370,11 +371,9 @@ class SQLBuilder:
     def execute(self):
         if self._type == SQLBuilder.SELECT:
             return self._connection.query(self.get_sql(), self._params)
-
         result = self._connection.execute(self.get_sql(), self._params)
         if self._type == SQLBuilder.INSERT:
             return self._connection.last_insert_id()
-
         return result
 
 
@@ -486,13 +485,17 @@ class CompositeExpression:
             return str(part)
         return part
 
+    def copy(self):
+        return copy.copy(self)
+
     def get_type(self):
         return self._type
 
     def add_multiple(self, parts=None):
         if parts is None:
             parts = []
-        map(self.add, parts)
+        for part in parts:
+            self.add(part)
         return self
 
     def add(self, part):

@@ -53,7 +53,7 @@ class Statement:
 
     def iterate(self, fetch_mode=None, column_index=0):
         if fetch_mode is None:
-            fetch_mode = self._connection.get_default_fetch_mode()
+            fetch_mode = self._connection.get_fetch_mode()
 
         for row in self._connection.get_driver().iterate():
             yield self._transform(row, fetch_mode, column_index)

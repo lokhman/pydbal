@@ -57,9 +57,6 @@ class MySQLDriver(BaseDriver):
         self._conn = None
         self._cursor = None
 
-    def get_platform(self):
-        return self._platform
-
     def get_server_version_info(self):
         return getattr(self._conn, "_server_version", None)
 
@@ -93,10 +90,10 @@ class MySQLDriver(BaseDriver):
     def execute(self, sql, *params):
         try:
             self._cursor = self._get_cursor()
-            self._sql_logger.debug("%s %s", sql, params or "")
+            self._log(sql, params)
             return self._cursor.execute(sql, params)
         except Exception as ex:
-            raise DBALDriverError.execute_exception(self, ex, sql, params)
+            raise #DBALDriverError.execute_exception(self, ex, sql, params)
 
     def _get_cursor(self):
         try:
@@ -128,11 +125,11 @@ class MySQLDriver(BaseDriver):
         self.execute_and_clear("START TRANSACTION")
 
     def commit(self):
-        self._sql_logger.debug("COMMIT")
+        self._log("COMMIT")
         self._conn.commit()
 
     def rollback(self):
-        self._sql_logger.debug("ROLLBACK")
+        self._log("ROLLBACK")
         self._conn.rollback()
 
     def escape_string(self, value):
