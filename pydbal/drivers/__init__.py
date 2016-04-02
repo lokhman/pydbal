@@ -28,6 +28,9 @@ from abc import ABCMeta, abstractmethod
 class BaseDriver:
     __metaclass__ = ABCMeta
 
+    _sql_logger = None
+    _platform = None
+
     @abstractmethod
     def __init__(self, **params):
         pass
@@ -43,8 +46,6 @@ class BaseDriver:
             sql_logger.debug(sql)
 
     def get_sql_logger(self):
-        if getattr(self, "_sql_logger", None) is None:
-            return None
         try:
             # 'getChild' property available in Python 2.7+
             return self._sql_logger.getChild(self.get_name())
@@ -52,7 +53,7 @@ class BaseDriver:
             return self._sql_logger
 
     def get_platform(self):
-        return getattr(self, "_platform")
+        return self._platform
 
     def get_server_version(self):
         info = self.get_server_version_info()
