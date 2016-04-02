@@ -43,20 +43,22 @@ class BaseDriver:
             sql_logger.debug(sql)
 
     def get_sql_logger(self):
-        if getattr(self, "_sql_logger", None) is not None:
-            try:
-                # 'getChild' property available in Python 2.7+
-                return self._sql_logger.getChild(self.get_name())
-            except AttributeError:
-                return self._sql_logger
+        if getattr(self, "_sql_logger", None) is None:
+            return None
+        try:
+            # 'getChild' property available in Python 2.7+
+            return self._sql_logger.getChild(self.get_name())
+        except AttributeError:
+            return self._sql_logger
 
     def get_platform(self):
         return getattr(self, "_platform")
 
     def get_server_version(self):
         info = self.get_server_version_info()
-        if info is not None:
-            return ".".join(map(str, info))
+        if info is None:
+            return None
+        return ".".join(map(str, info))
 
     def get_server_version_info(self):
         return None

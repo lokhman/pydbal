@@ -72,9 +72,6 @@ class SQLBuilder:
     def get_connection(self):
         return self._connection
 
-    def get_state(self):
-        return self._state
-
     def set_parameter(self, key, value):
         if isinstance(key, str):
             key = key.lstrip(":")
@@ -96,7 +93,7 @@ class SQLBuilder:
         return self
 
     def get_parameter(self, key):
-        return self._params.get(key)
+        return self._params[key]
 
     def get_parameters(self):
         return self._params.copy()
@@ -117,7 +114,7 @@ class SQLBuilder:
     def get_max_results(self):
         return self._max_results
 
-    def add(self, sql_part_name, sql_part, append=False):
+    def _add(self, sql_part_name, sql_part, append=False):
         if not sql_part:
             return self
 
@@ -142,66 +139,66 @@ class SQLBuilder:
 
     def select(self, select, *args):
         self._type = SQLBuilder.SELECT
-        return self.add("select", (select, ) + args)
+        return self._add("select", (select,) + args)
 
     def add_select(self, select, *args):
         self._type = SQLBuilder.SELECT
-        return self.add("select", (select, ) + args, True)
+        return self._add("select", (select,) + args, True)
 
     def from_(self, table, alias=None):
-        return self.add("from", (table, alias), True)
+        return self._add("from", (table, alias), True)
 
     def insert(self, table):
         self._type = SQLBuilder.INSERT
-        return self.add("from", (table, ))
+        return self._add("from", (table,))
 
     def update(self, table, alias=None):
         self._type = SQLBuilder.UPDATE
-        return self.add("from", (table, alias))
+        return self._add("from", (table, alias))
 
     def delete(self, table, alias=None):
         self._type = SQLBuilder.DELETE
-        return self.add("from", (table, alias))
+        return self._add("from", (table, alias))
 
     def inner_join(self, from_alias, join, alias, *condition):
         condition = CompositeExpression(CompositeExpression.TYPE_AND, *condition)
-        return self.add("join", (from_alias, "inner", join, alias, condition), True)
+        return self._add("join", (from_alias, "inner", join, alias, condition), True)
 
     def left_join(self, from_alias, join, alias, *condition):
         condition = CompositeExpression(CompositeExpression.TYPE_AND, *condition)
-        return self.add("join", (from_alias, "left", join, alias, condition), True)
+        return self._add("join", (from_alias, "left", join, alias, condition), True)
 
     def right_join(self, from_alias, join, alias, *condition):
         condition = CompositeExpression(CompositeExpression.TYPE_AND, *condition)
-        return self.add("join", (from_alias, "right", join, alias, condition), True)
+        return self._add("join", (from_alias, "right", join, alias, condition), True)
 
     join = inner_join
 
     def set(self, key, value):
-        return self.add("set", key + " = " + value, True)
+        return self._add("set", key + " = " + value, True)
 
     def where(self, where, *args):
-        return self.add("where", CompositeExpression(CompositeExpression.TYPE_AND, *(where, ) + args))
+        return self._add("where", CompositeExpression(CompositeExpression.TYPE_AND, *(where,) + args))
 
     def and_where(self, where, *args):
         where = (where, ) + args
-        expr = self.get_sql_part("where")
+        expr = self._sql_parts["where"]
         if isinstance(expr, CompositeExpression):
             where = (str(expr), ) + where
-        return self.add("where", CompositeExpression(CompositeExpression.TYPE_AND, *where))
+        return self._add("where", CompositeExpression(CompositeExpression.TYPE_AND, *where))
 
     def or_where(self, where, *args):
         where = (where, ) + args
-        expr = self.get_sql_part("where")
+        expr = self._sql_parts["where"]
         if isinstance(expr, CompositeExpression):
             where = (str(expr), ) + where
-        return self.add("where", CompositeExpression(CompositeExpression.TYPE_OR, *where))
+        return self._add("where", CompositeExpression(CompositeExpression.TYPE_OR, *where))
 
     def group_by(self, group_by, *args):
-        return self.add("group_by", (group_by, ) + args)
+        return self._add("group_by", (group_by,) + args)
 
     def add_group_by(self, group_by, *args):
-        return self.add("group_by", (group_by, ) + args, True)
+        return self._add("group_by", (group_by,) + args, True)
 
     def set_value(self, column, value):
         self._sql_parts["values"][column] = value
@@ -209,37 +206,31 @@ class SQLBuilder:
 
     def values(self, values):
         if isinstance(values, dict):
-            return self.add("values", values)
+            return self._add("values", values)
         return self
 
     def having(self, having, *args):
-        return self.add("having", CompositeExpression(CompositeExpression.TYPE_AND, *(having, ) + args))
+        return self._add("having", CompositeExpression(CompositeExpression.TYPE_AND, *(having,) + args))
 
     def and_having(self, having, *args):
         having = (having, ) + args
-        expr = self.get_sql_part("having")
+        expr = self._sql_parts["having"]
         if isinstance(expr, CompositeExpression):
             having = (str(expr), ) + having
-        return self.add("having", CompositeExpression(CompositeExpression.TYPE_AND, *having))
+        return self._add("having", CompositeExpression(CompositeExpression.TYPE_AND, *having))
 
     def or_having(self, having, *args):
         having = (having, ) + args
-        expr = self.get_sql_part("having")
+        expr = self._sql_parts["having"]
         if isinstance(expr, CompositeExpression):
             having = (str(expr), ) + having
-        return self.add("having", CompositeExpression(CompositeExpression.TYPE_OR, *having))
+        return self._add("having", CompositeExpression(CompositeExpression.TYPE_OR, *having))
 
     def order_by(self, sort, order="ASC"):
-        return self.add("order_by", sort + " " + order.upper())
+        return self._add("order_by", sort + " " + order.upper())
 
     def add_order_by(self, sort, order="ASC"):
-        return self.add("order_by", sort + " " + order.upper(), True)
-
-    def get_sql_part(self, sql_part_name):
-        return self._sql_parts[sql_part_name]
-
-    def get_sql_parts(self):
-        return self._sql_parts.copy()
+        return self._add("order_by", sort + " " + order.upper(), True)
 
     def reset_sql_parts(self, sql_part_names=None):
         if sql_part_names is None:

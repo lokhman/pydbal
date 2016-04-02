@@ -377,7 +377,7 @@ class Connection:
         """
         auto_commit = bool(auto_commit)
         if auto_commit == self._auto_commit:
-            return None
+            return
 
         self._auto_commit = auto_commit
 

@@ -93,7 +93,7 @@ class MySQLDriver(BaseDriver):
             self._log(sql, params)
             return self._cursor.execute(sql, params)
         except Exception as ex:
-            raise #DBALDriverError.execute_exception(self, ex, sql, params)
+            raise DBALDriverError.execute_exception(self, ex, sql, params)
 
     def _get_cursor(self):
         try:
