@@ -47,6 +47,8 @@ class Connection:
     TRANSACTION_REPEATABLE_READ = 3
     TRANSACTION_SERIALIZABLE = 4
 
+    _instance_count = 0
+
     def __init__(self, driver, auto_connect=True, auto_commit=True, sql_logger=None, **params):
         """Initialises database connection.
 
@@ -56,6 +58,8 @@ class Connection:
         :param sql_logger: SQL logger
         :param params: database connection parameters
         """
+        Connection._instance_count += 1
+
         if not isinstance(sql_logger, logging.Logger):
             sql_logger = self._get_default_sql_logger()
         self._sql_logger = sql_logger
@@ -89,7 +93,9 @@ class Connection:
 
     def __del__(self):
         """Closes connection on instance destroy."""
-        self.close()
+        if hasattr(self, "_driver"):
+            Connection._instance_count -= 1
+            self.close()
 
     @staticmethod
     def _get_default_sql_logger():
@@ -104,7 +110,10 @@ class Connection:
             "[%(levelname)1.1s %(asctime)s %(name)s] %(message)s",
             "%y%m%d %H:%M:%S"))
 
-        logger = logging.getLogger("pydbal")
+        logger_name = "pydbal"
+        if Connection._instance_count > 1:
+            logger_name += ":" + str(Connection._instance_count)
+        logger = logging.getLogger(logger_name)
         logger.setLevel(logging.DEBUG)
         logger.addHandler(handler)
         return logger
