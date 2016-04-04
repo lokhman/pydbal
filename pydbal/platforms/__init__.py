@@ -70,7 +70,7 @@ class BasePlatform:
     def supports_release_savepoints(self):
         return self.supports_savepoints()
 
-    def _get_set_transaction_isolation_sql(self, level):
+    def _get_transaction_isolation_sql(self, level):
         if level == Connection.TRANSACTION_READ_UNCOMMITTED:
             return "READ UNCOMMITTED"
         elif level == Connection.TRANSACTION_READ_COMMITTED:

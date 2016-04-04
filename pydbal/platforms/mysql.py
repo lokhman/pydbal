@@ -36,4 +36,4 @@ class MySQLPlatform(BasePlatform):
         return sql
 
     def get_set_transaction_isolation_sql(self, level):
-        return "SET SESSION TRANSACTION ISOLATION LEVEL " + self._get_set_transaction_isolation_sql(level)
+        return "SET SESSION TRANSACTION ISOLATION LEVEL " + self._get_transaction_isolation_sql(level)
