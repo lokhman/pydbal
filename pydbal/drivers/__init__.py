@@ -30,6 +30,7 @@ class BaseDriver:
 
     _sql_logger = None
     _platform = None
+    _conn = None
 
     @abstractmethod
     def __init__(self, **params):
@@ -76,9 +77,8 @@ class BaseDriver:
     def clear(self):
         pass
 
-    @abstractmethod
     def is_connected(self):
-        pass
+        return self._conn is not None
 
     @abstractmethod
     def error_code(self):
@@ -98,10 +98,6 @@ class BaseDriver:
 
     @abstractmethod
     def iterate(self):
-        pass
-
-    @abstractmethod
-    def column_count(self):
         pass
 
     @abstractmethod

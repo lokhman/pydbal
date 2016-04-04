@@ -31,6 +31,8 @@ from ..platforms.mysql import MySQLPlatform
 
 
 class MySQLDriver(BaseDriver):
+    _cursor = None
+
     def __init__(self, host, user=None, password=None, database=None, port=3306, timeout=0, charset="utf8",
                  timezone="+0:00", sql_mode="TRADITIONAL", **params):
         self._sql_logger = params.pop("sql_logger")
@@ -54,9 +56,6 @@ class MySQLDriver(BaseDriver):
             self._params["host"] = host
             self._params["port"] = int(port)
 
-        self._conn = None
-        self._cursor = None
-
     def get_server_version_info(self):
         return getattr(self._conn, "_server_version", None)
 
@@ -69,17 +68,14 @@ class MySQLDriver(BaseDriver):
 
     def close(self):
         self.clear()
-        if getattr(self, "_conn", None) is not None:
+        if self._conn is not None:
             self._conn.close()
             self._conn = None
 
     def clear(self):
-        if getattr(self, "_cursor", None) is not None:
+        if self._cursor is not None:
             self._cursor.close()
             self._cursor = None
-
-    def is_connected(self):
-        return self._conn is not None
 
     def error_code(self):
         return self._conn.errno()
@@ -112,14 +108,11 @@ class MySQLDriver(BaseDriver):
 
         self.clear()
 
-    def column_count(self):
-        return self._conn.field_count()
-
     def row_count(self):
         return self._conn.affected_rows()
 
     def last_insert_id(self, seq_name=None):
-        return self._conn.insert_id()
+        return self._conn.insert_id() or None
 
     def begin_transaction(self):
         self.execute_and_clear("START TRANSACTION")
