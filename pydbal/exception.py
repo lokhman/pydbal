@@ -109,3 +109,11 @@ class DBALBuilderError(DBALError):
         return cls(
             "The given alias '%s' is not unique in FROM and JOIN clause table. "
             "The currently registered aliases are: %s." % (alias, ", ".join(registered_aliases)))
+
+
+class DBALWarning(Warning):
+    pass
+
+
+class DBALNotImplementedWarning(DBALWarning):
+    pass

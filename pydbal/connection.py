@@ -32,7 +32,8 @@ from .exception import DBALConnectionError
 
 class Connection:
     DRIVERS = {
-        "mysql": "pydbal.drivers.mysql.MySQLDriver"
+        "mysql": "pydbal.drivers.mysql.MySQLDriver",
+        "sqlite": "pydbal.drivers.sqlite.SQLiteDriver"
     }
 
     FETCH_DEFAULT = Statement.FETCH_DEFAULT
