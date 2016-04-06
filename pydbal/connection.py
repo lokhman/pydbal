@@ -161,6 +161,14 @@ class Connection:
         self._ensure_connected()
         return self._driver.get_server_version_info()
 
+    def get_database(self):
+        """Gets the name of the database this Connection is connected to.
+
+        :return: database name
+        :rtype: str
+        """
+        return self._driver.get_database(self)
+
     def connect(self):
         """Opens database connection."""
         self._driver.connect()
