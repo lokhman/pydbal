@@ -56,8 +56,13 @@ class MySQLDriver(BaseDriver):
             self._params["host"] = host
             self._params["port"] = int(port)
 
-    def get_server_version_info(self):
+    def _get_server_version_info(self):
         return getattr(self._conn, "_server_version", None)
+
+    def get_database(self, connection):
+        if "db" in self._params:
+            return self._params["db"]
+        return connection.query("SELECT DATABASE()").fetch_column()
 
     def connect(self):
         self.close()

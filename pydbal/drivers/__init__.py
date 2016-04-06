@@ -28,6 +28,8 @@ from abc import ABCMeta, abstractmethod
 class BaseDriver:
     __metaclass__ = ABCMeta
 
+    _server_version_info = None
+
     _sql_logger = None
     _platform = None
     _conn = None
@@ -63,7 +65,17 @@ class BaseDriver:
         return ".".join(map(str, info))
 
     def get_server_version_info(self):
-        return None
+        if not self._server_version_info:
+            self._server_version_info = self._get_server_version_info()
+        return self._server_version_info
+
+    @abstractmethod
+    def _get_server_version_info(self):
+        pass
+
+    @abstractmethod
+    def get_database(self, connection):
+        pass
 
     @abstractmethod
     def connect(self):

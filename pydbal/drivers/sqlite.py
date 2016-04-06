@@ -46,8 +46,11 @@ class SQLiteDriver(BaseDriver):
 
         self._params = dict(database=database, timeout=timeout, **params)
 
-    def get_server_version_info(self):
+    def _get_server_version_info(self):
         return sqlite3.sqlite_version_info
+
+    def get_database(self, connection):
+        return self._params["database"]
 
     @staticmethod
     def _row_factory(cursor, row):
