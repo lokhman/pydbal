@@ -28,7 +28,6 @@ from ..exception import DBALPlatformError
 
 
 class SQLitePlatform(BasePlatform):
-
     def _modify_limit_sql(self, sql, limit, offset):
         if limit is None and offset is not None:
             return sql + " LIMIT -1 OFFSET " + str(offset)
@@ -43,7 +42,6 @@ class SQLitePlatform(BasePlatform):
             Connection.TRANSACTION_SERIALIZABLE
         ):
             return 1
-
         raise DBALPlatformError.invalid_isolation_level(level)
 
     def get_set_transaction_isolation_sql(self, level):
