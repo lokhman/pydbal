@@ -26,8 +26,9 @@ import logging
 
 from .drivers import BaseDriver
 from .statement import Statement
-from .builder import SQLBuilder, ExpressionBuilder
+from .schema import SchemaManager
 from .exception import DBALConnectionError
+from .builder import SQLBuilder, ExpressionBuilder
 
 
 class Connection:
@@ -77,9 +78,10 @@ class Connection:
 
         self._params = params
 
-        self._expr = ExpressionBuilder(self)
-
         self._platform = self._driver.get_platform()
+        self._schema_manager = SchemaManager(self)
+
+        self._expr = ExpressionBuilder(self)
         self._fetch_mode = Connection.FETCH_DICT
         self._auto_connect = auto_connect
         self._auto_commit = auto_commit
@@ -97,6 +99,12 @@ class Connection:
         if hasattr(self, "_driver"):
             Connection._instance_count -= 1
             self.close()
+
+    @staticmethod
+    def cache_clear():
+        from . import cache
+        cache.clear()
+        del cache
 
     @staticmethod
     def _get_default_sql_logger():
@@ -149,7 +157,7 @@ class Connection:
         :return: platform version
         :rtype: str
         """
-        self._ensure_connected()
+        self.ensure_connected()
         return self._driver.get_server_version()
 
     def get_platform_version_info(self):
@@ -158,7 +166,7 @@ class Connection:
         :return: platform version info
         :rtype: tuple
         """
-        self._ensure_connected()
+        self.ensure_connected()
         return self._driver.get_server_version_info()
 
     def get_database(self):
@@ -167,7 +175,8 @@ class Connection:
         :return: database name
         :rtype: str
         """
-        return self._driver.get_database(self)
+        self.ensure_connected()
+        return self._driver.get_database()
 
     def connect(self):
         """Opens database connection."""
@@ -185,12 +194,20 @@ class Connection:
         """
         return self._driver.is_connected()
 
-    def _ensure_connected(self):
+    def ensure_connected(self):
         """Ensures database connection is still open."""
         if not self.is_connected():
             if not self._auto_connect:
                 raise DBALConnectionError.connection_closed()
             self.connect()
+
+    def get_schema_manager(self):
+        """Gets the schema manager that can be used to inspect or change the database schema through the connection.
+
+        :return: schema manager
+        :rtype: pydbal.schema.SchemaManager
+        """
+        return self._schema_manager
 
     def sql_builder(self):
         """Creates the new SQL builder.
@@ -231,7 +248,7 @@ class Connection:
         :return: result set as a Statement object
         :rtype: pydbal.statement.Statement
         """
-        self._ensure_connected()
+        self.ensure_connected()
         stmt = Statement(self)
         stmt.execute(sql, params)
         return stmt
@@ -244,7 +261,7 @@ class Connection:
         :return: number of affected rows
         :rtype: int
         """
-        self._ensure_connected()
+        self.ensure_connected()
         return Statement(self).execute(sql, params)
 
     def column_count(self):
@@ -253,7 +270,7 @@ class Connection:
         :return: number of columns in the result set; if there is no result set, this method should return `0`
         :rtype: int
         """
-        self._ensure_connected()
+        self.ensure_connected()
         return self._driver.column_count()
 
     def row_count(self):
@@ -266,7 +283,7 @@ class Connection:
         :return: number of rows
         :rtype: int
         """
-        self._ensure_connected()
+        self.ensure_connected()
         return self._driver.row_count()
 
     def last_insert_id(self, seq_name=None):
@@ -279,7 +296,7 @@ class Connection:
         :param seq_name: name of the sequence object from which the ID should be returned
         :return: representation of the last inserted ID
         """
-        self._ensure_connected()
+        self.ensure_connected()
         return self._driver.last_insert_id(seq_name)
 
     def error_code(self):
@@ -288,7 +305,7 @@ class Connection:
         :return: the last error code
         :rtype: int
         """
-        self._ensure_connected()
+        self.ensure_connected()
         return self._driver.error_code()
 
     def error_info(self):
@@ -296,12 +313,12 @@ class Connection:
 
         :return: the last error information
         """
-        self._ensure_connected()
+        self.ensure_connected()
         return self._driver.error_info()
 
     def begin_transaction(self):
         """Starts a transaction by suspending auto-commit mode."""
-        self._ensure_connected()
+        self.ensure_connected()
         self._transaction_nesting_level += 1
         if self._transaction_nesting_level == 1:
             self._driver.begin_transaction()
@@ -315,7 +332,7 @@ class Connection:
         if self._is_rollback_only:
             raise DBALConnectionError.commit_failed_rollback_only()
 
-        self._ensure_connected()
+        self.ensure_connected()
         if self._transaction_nesting_level == 1:
             self._driver.commit()
         elif self._nest_transactions_with_savepoints:
@@ -338,7 +355,7 @@ class Connection:
         if self._transaction_nesting_level == 0:
             raise DBALConnectionError.no_active_transaction()
 
-        self._ensure_connected()
+        self.ensure_connected()
         if self._transaction_nesting_level == 1:
             self._transaction_nesting_level = 0
             self._driver.rollback()
@@ -431,9 +448,9 @@ class Connection:
 
         :param level: the level to set
         """
-        self._ensure_connected()
+        self.ensure_connected()
         self._transaction_isolation_level = level
-        self._driver.execute_and_clear(self._platform.get_set_transaction_isolation_sql(level))
+        self._platform.set_transaction_isolation(level)
 
     def get_transaction_isolation(self):
         """Returns the currently active transaction isolation level.
@@ -452,7 +469,7 @@ class Connection:
         """
         if self._transaction_nesting_level > 0:
             raise DBALConnectionError.may_not_alter_nested_transaction_with_savepoints_in_transaction()
-        if not self._platform.supports_savepoints():
+        if not self._platform.is_savepoints_supported():
             raise DBALConnectionError.savepoints_not_supported()
         self._nest_transactions_with_savepoints = bool(nest_transactions_with_savepoints)
 
@@ -478,10 +495,10 @@ class Connection:
         :param savepoint: the name of the savepoint to create
         :raise: pydbal.exception.DBALConnectionError
         """
-        if not self._platform.supports_savepoints():
+        if not self._platform.is_savepoints_supported():
             raise DBALConnectionError.savepoints_not_supported()
-        self._ensure_connected()
-        self._driver.execute_and_clear(self._platform.create_savepoint(savepoint))
+        self.ensure_connected()
+        self._platform.create_savepoint(savepoint)
 
     def release_savepoint(self, savepoint):
         """Releases the given savepoint.
@@ -489,11 +506,11 @@ class Connection:
         :param savepoint: the name of the savepoint to release
         :raise: pydbal.exception.DBALConnectionError
         """
-        if not self._platform.supports_savepoints():
+        if not self._platform.is_savepoints_supported():
             raise DBALConnectionError.savepoints_not_supported()
-        if self._platform.supports_release_savepoints():
-            self._ensure_connected()
-            self._driver.execute_and_clear(self._platform.release_savepoint(savepoint))
+        if self._platform.is_release_savepoints_supported():
+            self.ensure_connected()
+            self._platform.release_savepoint(savepoint)
 
     def rollback_savepoint(self, savepoint):
         """Rolls back to the given savepoint.
@@ -501,10 +518,10 @@ class Connection:
         :param savepoint: the name of the savepoint to rollback to
         :raise: pydbal.exception.DBALConnectionError
         """
-        if not self._platform.supports_savepoints():
+        if not self._platform.is_savepoints_supported():
             raise DBALConnectionError.savepoints_not_supported()
-        self._ensure_connected()
-        self._driver.execute_and_clear(self._platform.rollback_savepoint(savepoint))
+        self.ensure_connected()
+        self._platform.rollback_savepoint(savepoint)
 
     def insert(self, table, values):
         """Inserts a table row with specified data.

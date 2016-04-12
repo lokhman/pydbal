@@ -59,10 +59,11 @@ class MySQLDriver(BaseDriver):
     def _get_server_version_info(self):
         return getattr(self._conn, "_server_version", None)
 
-    def get_database(self, connection):
+    def get_database(self):
         if "db" in self._params:
             return self._params["db"]
-        return connection.query("SELECT DATABASE()").fetch_column()
+        self.execute("SELECT DATABASE()")
+        return next(self.iterate())[0][1]
 
     def connect(self):
         self.close()

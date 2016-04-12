@@ -79,18 +79,22 @@ class DBALPlatformError(DBALError):
 
     @classmethod
     def invalid_offset(cls, offset):
-        return cls("LIMIT argument offset %s is not valid." % offset)
+        return cls("LIMIT argument offset '%s' is not valid." % offset)
 
     @classmethod
     def offset_not_supported(cls, platform):
         return cls("Platform '%s' does not support offset values in limit queries." % platform.get_name())
+
+    @classmethod
+    def unknown_column_type(cls, type_):
+        return cls("Unknown database type '%s' requested." % type_)
 
 
 class DBALStatementError(DBALError):
     @classmethod
     def missing_positional_parameter(cls, param_index, params):
         return cls(
-            "Value for positional parameter with index %d not found in params array: %s." % (param_index, params))
+            "Value for positional parameter with index '%d' not found in params array: %s." % (param_index, params))
 
     @classmethod
     def missing_named_parameter(cls, param_name, params):
@@ -109,6 +113,12 @@ class DBALBuilderError(DBALError):
         return cls(
             "The given alias '%s' is not unique in FROM and JOIN clause table. "
             "The currently registered aliases are: %s." % (alias, ", ".join(registered_aliases)))
+
+
+class DBALTypesError(DBALError):
+    @classmethod
+    def unknown_type(cls, name):
+        return cls("Unknown column type '%s' requested." % name)
 
 
 class DBALWarning(Warning):

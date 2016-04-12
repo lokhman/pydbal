@@ -74,7 +74,7 @@ class BaseDriver:
         pass
 
     @abstractmethod
-    def get_database(self, connection):
+    def get_database(self):
         pass
 
     @abstractmethod

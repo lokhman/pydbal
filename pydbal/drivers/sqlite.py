@@ -49,7 +49,7 @@ class SQLiteDriver(BaseDriver):
     def _get_server_version_info(self):
         return sqlite3.sqlite_version_info
 
-    def get_database(self, connection):
+    def get_database(self):
         return self._params["database"]
 
     @staticmethod
