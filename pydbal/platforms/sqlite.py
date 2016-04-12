@@ -130,8 +130,7 @@ class SQLitePlatform(BasePlatform):
         sql = "SELECT name FROM sqlite_master WHERE type = 'table' AND name != 'sqlite_sequence' " \
               "AND name != 'geometry_columns' AND name != 'spatial_ref_sys' UNION ALL " \
               "SELECT name FROM sqlite_temp_master WHERE type = 'table' ORDER BY name"
-
-        for row in self._fetch(sql):
+        for row in self._fetch(sql):  # [{"name": ...}, ...]
             yield row[0][1]
 
     def get_table_columns(self, table, database=None):
@@ -170,8 +169,7 @@ class SQLitePlatform(BasePlatform):
                 re_ = r"(?:" + name + r")[^,(]+(?:\([^()]+\)[^,]*)?(?:(?:DEFAULT|CHECK)\s*(?:\(.*?\))?[^,]*)*" \
                       r"COLLATE\s+[\"']?([^\s,\"')]+)"
                 matches = re.findall(re_, create_sql, re.IGNORECASE | re.DOTALL)
-                if matches:
-                    options["platform_options"] = {"collation": matches[0]}
+                options["platform_options"] = {"collation": matches[0] if matches else "BINARY"}
 
             re_ = r"[\s(,](?:" + name + r")(?:\(.*?\)|[^,(])*?,?((?:\s*--[^\n]*\n?)+)"
             matches = re.findall(re_, create_sql, re.IGNORECASE | re.DOTALL)
