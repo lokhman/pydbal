@@ -31,6 +31,9 @@ except ImportError:
 
 def cached(func):
     def wrapper(*args, **kwargs):
+        if len(args) < func.func_code.co_argcount:
+            args += func.func_defaults
+
         if not kwargs.pop("_cache", True):
             try:
                 del _cache[func, args]
@@ -46,6 +49,4 @@ def cached(func):
 
     return wrapper
 
-
-def clear():
-    _cache.clear()
+clear = _cache.clear
