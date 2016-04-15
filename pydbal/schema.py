@@ -37,7 +37,11 @@ class BaseAsset:
     _quoted = False
 
     def __repr__(self):
-        return "<%s.%s> %s" % (self.__class__.__module__, self.__class__.__name__, self.__str__())
+        return "<%s.%s> %s" % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            self.__str__()
+        )
 
     @abstractmethod
     def __str__(self):

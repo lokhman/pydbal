@@ -102,7 +102,7 @@ class MySQLDriver(BaseDriver):
             return self._conn.cursor()
         except MySQLdb.OperationalError:
             self.connect()
-            return self._get_cursor()
+            return self._conn.cursor()
 
     def iterate(self):
         if self._cursor is None:
