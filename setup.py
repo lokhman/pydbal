@@ -29,7 +29,7 @@ except ImportError:
 
 kwargs = {}
 
-version = "0.2"
+version = "0.3"
 
 with open("README.md") as f:
     kwargs["long_description"] = f.read()
@@ -46,7 +46,7 @@ setup(
     author="Alexander Lokhman",
     author_email="alex.lokhman@gmail.com",
     url="https://github.com/lokhman/pydbal",
-    download_url="https://github.com/lokhman/pydbal/tarball/0.2",
+    download_url="https://github.com/lokhman/pydbal/tarball/0.3",
     keywords=["database", "abstraction", "sql", "mysql", "sqlite"],
     license="https://opensource.org/licenses/MIT",
     classifiers=[],
