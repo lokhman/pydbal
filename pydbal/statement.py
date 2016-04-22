@@ -76,14 +76,12 @@ class Statement:
 
         return row
 
-    def execute(self, sql, params=None):
-        if not isinstance(params, dict):
-            params = {}
-
-        exec_params = []
-        exec_sql = Statement._re_params.sub(self._prepare(params, exec_params), sql)
-
-        return self._connection.get_driver().execute(exec_sql, *exec_params)
+    def execute(self, sql, *args, **kwargs):
+        for i, arg in enumerate(args):
+            kwargs[i] = arg
+        params = []
+        sql = Statement._re_params.sub(self._prepare(kwargs, params), sql)
+        return self._connection.get_driver().execute(sql, *params)
 
     def _prepare(self, params, exec_params):
         def replace(match):

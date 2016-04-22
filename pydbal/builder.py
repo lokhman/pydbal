@@ -96,7 +96,7 @@ class SQLBuilder:
         return self._params[key]
 
     def get_parameters(self):
-        return self._params.copy()
+        return self._params
 
     def set_first_result(self, first_result):
         self._state = SQLBuilder.STATE_DIRTY
@@ -359,10 +359,20 @@ class SQLBuilder:
             sql += " WHERE " + str(self._sql_parts["where"])
         return sql
 
+    def _prepare_params(self):
+        args, kwargs = [], {}
+        for key, value in self._params.iteritems():
+            if isinstance(key, int):
+                args.append(value)
+            else:
+                kwargs[key] = value
+        return args, kwargs
+
     def execute(self):
+        args, kwargs = self._prepare_params()
         if self._type == SQLBuilder.SELECT:
-            return self._connection.query(self.get_sql(), self._params)
-        result = self._connection.execute(self.get_sql(), self._params)
+            return self._connection.query(self.get_sql(), *args, **kwargs)
+        result = self._connection.execute(self.get_sql(), *args, **kwargs)
         if self._type == SQLBuilder.INSERT:
             return self._connection.last_insert_id()
         return result

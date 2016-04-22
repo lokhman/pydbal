@@ -240,38 +240,31 @@ class Connection:
         """
         self._fetch_mode = fetch_mode
 
-    def query(self, sql, params=None):
+    def query(self, sql, *args, **kwargs):
         """Executes an SQL statement, returning a result set as a Statement object.
 
         :param sql: query to execute
-        :param params: parameters iterable
+        :param args: parameters iterable
+        :param kwargs: parameters iterable
         :return: result set as a Statement object
         :rtype: pydbal.statement.Statement
         """
         self.ensure_connected()
         stmt = Statement(self)
-        stmt.execute(sql, params)
+        stmt.execute(sql, *args, **kwargs)
         return stmt
 
-    def execute(self, sql, params=None):
+    def execute(self, sql, *args, **kwargs):
         """Executes an SQL INSERT/UPDATE/DELETE query with the given parameters and returns the number of affected rows.
 
         :param sql: statement to execute
-        :param params: parameters iterable
+        :param args: parameters iterable
+        :param kwargs: parameters iterable
         :return: number of affected rows
         :rtype: int
         """
         self.ensure_connected()
-        return Statement(self).execute(sql, params)
-
-    def column_count(self):
-        """Returns the number of columns in the result set.
-
-        :return: number of columns in the result set; if there is no result set, this method should return `0`
-        :rtype: int
-        """
-        self.ensure_connected()
-        return self._driver.column_count()
+        return Statement(self).execute(sql, *args, **kwargs)
 
     def row_count(self):
         """Returns the number of rows affected by the last DELETE, INSERT, or UPDATE statement.
