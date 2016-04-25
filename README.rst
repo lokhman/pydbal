@@ -3,34 +3,46 @@ pyDBAL
 
 Database Abstraction Layer (**DBAL**) for Python 2.6+.
 
-pyDBAL library is the improved and optimised port of [Doctrine DBAL](http://www.doctrine-project.org/projects/dbal.html)
-project.
+pyDBAL library is the improved and optimised port of `Doctrine
+DBAL <http://www.doctrine-project.org/projects/dbal.html>`__ project.
 
-### Installation
+Installation
+------------
+
+.. code-block:: python
 
     $ pip install pydbal
 
-### Requirements
+Requirements
+------------
 
-For using `mysql` driver `MySQLdb` library is required. Optionally `lrucache` is required to maintain memory safe cache
-operations.
+For using ``mysql`` driver ``MySQLdb`` library is required. Optionally
+``lrucache`` is required to maintain memory safe cache operations.
 
-### Basic Usage
+Basic Usage
+-----------
 
-To open new connection import `Connection` from `pydbal.connection` package and initialise `Connection` class for a
-required driver with desired parameters.
+To open new connection import ``Connection`` from ``pydbal.connection``
+package and initialise ``Connection`` class for a required driver with
+desired parameters.
+
+.. code-block:: python
 
     from pydbal.connection import Connection
 
     conn = Connection("mysql", host="localhost", user="root", database="mydb")
 
-pyDBAL currently supports the following drivers: `mysql` and `sqlite`. You can create a custom driver by inheriting
-`pydbal.drivers.BaseDriver` and passing to `Connection` constructor.
+pyDBAL currently supports the following drivers: ``mysql`` and
+``sqlite``. You can create a custom driver by inheriting
+``pydbal.drivers.BaseDriver`` and passing to ``Connection`` constructor.
 
-#### Query Statements
+Query Statements
+~~~~~~~~~~~~~~~~
 
-To **SELECT** data from the database you may use `query` method. This method will return the instance of
-`pydbal.statement.Statement`.
+To **SELECT** data from the database you may use ``query`` method. This
+method will return the instance of ``pydbal.statement.Statement``.
+
+.. code-block:: python
 
     # simple fetch generator
     for row in conn.query('SELECT * FROM table'):
@@ -54,10 +66,13 @@ To **SELECT** data from the database you may use `query` method. This method wil
     # fetch all values from column by index
     ids = conn.query('SELECT id FROM table').fetch_all(fetch_mode=Connection.FETCH_COLUMN, column_index=0)
 
-#### Execute Statements
+Execute Statements
+~~~~~~~~~~~~~~~~~~
 
-To execute **INSERT**, **UPDATE** or **DELETE** statements you may use `execute` method. This method will return number
-of affected rows.
+To execute **INSERT**, **UPDATE** or **DELETE** statements you may use
+``execute`` method. This method will return number of affected rows.
+
+.. code-block:: python
 
     # INSERT
     conn.execute('INSERT INTO table VALUES (?)', [val1, val2, val3])
@@ -69,9 +84,13 @@ of affected rows.
     # DELETE
     affected_rows = conn.execute('DELETE FROM table WHERE id = ?', id_)
 
-#### Statement Parameters
+Statement Parameters
+~~~~~~~~~~~~~~~~~~~~
 
-Both `query` and `execute` methods support safe parameter binding by passing arguments after the first `sql` argument.
+Both ``query`` and ``execute`` methods support safe parameter binding by
+passing arguments after the first ``sql`` argument.
+
+.. code-block:: python
 
     # single positional parameter
     row = conn.query('SELECT * FROM table WHERE id = ?', id_).fetch()
@@ -85,9 +104,12 @@ Both `query` and `execute` methods support safe parameter binding by passing arg
     # iterable parameters
     row = conn.query('SELECT * FROM table WHERE id IN (?)', [id1, id2]).fetch()
 
-#### Transactions
+Transactions
+~~~~~~~~~~~~
 
 pyDBAL supports transactional operations.
+
+.. code-block:: python
 
     conn.begin_transaction()
     try:
@@ -102,7 +124,10 @@ pyDBAL supports transactional operations.
         return smth
     smth = conn.transaction(trans)
 
-If database platform supports *savepoints* you may enable and use nested transactions.
+If database platform supports *savepoints* you may enable and use nested
+transactions.
+
+.. code-block:: python
 
     conn.set_nest_transactions_with_savepoints(True)
     conn.begin_transaction()
@@ -117,9 +142,13 @@ If database platform supports *savepoints* you may enable and use nested transac
     conn.release_savepoint('MYSAVEPOINT')
     conn.rollback_savepoint('MYSAVEPOINT')
 
-#### SQL Builder
+SQL Builder
+~~~~~~~~~~~
 
-To make writing SQL statements more simple and flexible it's suggested to use `pydbal.builder.SQLBuilder`.
+To make writing SQL statements more simple and flexible it's suggested
+to use ``pydbal.builder.SQLBuilder``.
+
+.. code-block:: python
 
     # SELECT
     sqb = (
@@ -161,9 +190,13 @@ To make writing SQL statements more simple and flexible it's suggested to use `p
             .set_parameter(0, id_)
     ).execute()
 
-#### Expression Builder
+Expression Builder
+~~~~~~~~~~~~~~~~~~
 
-`WHERE`, `HAVING` and `JOIN ... ON` expressions can be created using `pydbal.builder.ExpressionBuilder`.
+``WHERE``, ``HAVING`` and ``JOIN ... ON`` expressions can be created
+using ``pydbal.builder.ExpressionBuilder``.
+
+.. code-block:: python
 
     expr = conn.get_expression_builder()
     # or via SQL Builder instance
@@ -177,10 +210,14 @@ To make writing SQL statements more simple and flexible it's suggested to use `p
             )
     )
 
-#### Schema Manager
+Schema Manager
+~~~~~~~~~~~~~~
 
-pyDBAL comes with simple read only SQL schema manager. It supports listing of databases, tables, views, columns, indexes
-and foreign keys. Internal database queries are cached with `pydbal.cache` mechanisms.
+pyDBAL comes with simple read only SQL schema manager. It supports
+listing of databases, tables, views, columns, indexes and foreign keys.
+Internal database queries are cached with ``pydbal.cache`` mechanisms.
+
+.. code-block:: python
 
     sm = conn.get_schema_manager()
 
@@ -207,6 +244,8 @@ and foreign keys. Internal database queries are cached with `pydbal.cache` mecha
     table_foreign_keys = sm.get_table_foreign_keys('table')
     table_foreign_key_names = sm.get_table_foreign_key_names('table')
 
-### License
+License
+-------
 
-Library is available under the MIT license. The included LICENSE file describes this in detail.
+Library is available under the MIT license. The included LICENSE file
+describes this in detail.
