@@ -46,7 +46,6 @@ def cached(func):
             result = func(*args, **kwargs)
             _cache[func, args] = result
             return result
-
     return wrapper
 
 clear = _cache.clear

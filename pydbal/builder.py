@@ -134,7 +134,6 @@ class SQLBuilder:
                 self._sql_parts["join"][sql_part[0]] = [sql_part[1:]]
         else:
             self._sql_parts[sql_part_name] = sql_part
-
         return self
 
     def select(self, select, *args):
@@ -291,13 +290,11 @@ class SQLBuilder:
 
         if self._max_results is not None or self._first_result is not None:
             return self._connection.get_platform().modify_limit_sql(sql, self._max_results, self._first_result)
-
         return sql
 
     def _get_from_clauses(self):
         from_clauses = {}
         known_aliases = set()
-
         for from_ in self._sql_parts["from"]:
             if from_[1] is None:
                 table_sql = from_[0]
@@ -312,7 +309,6 @@ class SQLBuilder:
         for from_alias in self._sql_parts["join"].iterkeys():
             if from_alias not in known_aliases:
                 raise DBALBuilderError.unknown_alias(from_alias, known_aliases)
-
         return from_clauses
 
     def _get_sql_for_joins(self, from_alias, known_aliases):
@@ -344,9 +340,8 @@ class SQLBuilder:
         sql = "UPDATE " + self._sql_parts["from"][0][0]
         if self._sql_parts["from"][0][1] is not None:
             sql += " " + self._sql_parts["from"][0][1]
-        if not self._sql_parts["set"]:
-            raise
-        sql += " SET " + ", ".join(self._sql_parts["set"])
+        if self._sql_parts["set"]:
+            sql += " SET " + ", ".join(self._sql_parts["set"])
         if self._sql_parts["where"] is not None:
             sql += " WHERE " + str(self._sql_parts["where"])
         return sql

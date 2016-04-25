@@ -32,6 +32,12 @@ from .builder import SQLBuilder, ExpressionBuilder
 
 
 class Connection:
+    """pyDBAL generic connection class.
+
+    To open new connection import ``Connection`` from ``pydbal.connection``
+    package and initialise ``Connection`` class for a required driver with
+    desired parameters.
+    """
     DRIVERS = {
         "mysql": "pydbal.drivers.mysql.MySQLDriver",
         "sqlite": "pydbal.drivers.sqlite.SQLiteDriver"
@@ -102,6 +108,7 @@ class Connection:
 
     @staticmethod
     def cache_clear():
+        """Clears module cache."""
         from . import cache
         cache.clear()
         del cache

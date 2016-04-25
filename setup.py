@@ -31,7 +31,7 @@ kwargs = {}
 
 version = "0.3"
 
-with open("README.md") as f:
+with open("README.rst") as f:
     kwargs["long_description"] = f.read()
 
 if setuptools is not None:
@@ -46,9 +46,16 @@ setup(
     author="Alexander Lokhman",
     author_email="alex.lokhman@gmail.com",
     url="https://github.com/lokhman/pydbal",
-    download_url="https://github.com/lokhman/pydbal/tarball/0.3",
+    download_url="https://github.com/lokhman/pydbal/tarball/" + version,
     keywords=["database", "abstraction", "sql", "mysql", "sqlite"],
     license="https://opensource.org/licenses/MIT",
-    classifiers=[],
+    classifiers=[
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy"
+    ],
     **kwargs
 )
