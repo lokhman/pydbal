@@ -9,7 +9,7 @@ DBAL <http://www.doctrine-project.org/projects/dbal.html>`__ project.
 Installation
 ------------
 
-.. code-block:: python
+.. code-block:: bash
 
     $ pip install pydbal
 
