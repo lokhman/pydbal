@@ -91,18 +91,30 @@ class MySQLDriver(BaseDriver):
 
     def execute(self, sql, *params):
         try:
-            self._cursor = self._get_cursor()
-            self._log(sql, *params)
-            return self._cursor.execute(sql, params)
-        except Exception as ex:
+            return self._execute(sql, params)
+        except MySQLdb.DatabaseError as ex:
             raise DBALDriverError.execute_exception(self, ex, sql, params)
 
-    def _get_cursor(self):
+    def _execute(self, sql, params):
+        """Execute statement with reconnecting by connection closed error codes.
+
+        2006 (CR_SERVER_GONE_ERROR): MySQL server has gone away
+        2013 (CR_SERVER_LOST): Lost connection to MySQL server during query
+        2055 (CR_SERVER_LOST_EXTENDED): Lost connection to MySQL server at '%s', system error: %d
+        """
         try:
-            return self._conn.cursor()
-        except MySQLdb.OperationalError:
-            self.connect()
-            return self._conn.cursor()
+            return self._execute_unsafe(sql, params)
+        except MySQLdb.OperationalError as ex:
+            if ex.args[0] in (2006, 2013, 2055):
+                self._log("Connection with server is lost. Trying to reconnect.")
+                self.connect()
+                return self._execute_unsafe(sql, params)
+            raise  # MySQLdb.OperationalError
+
+    def _execute_unsafe(self, sql, params):
+        self._log(sql, *params)
+        self._cursor = self._conn.cursor()
+        return self._cursor.execute(sql, params)
 
     def iterate(self):
         if self._cursor is None:
