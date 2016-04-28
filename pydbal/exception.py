@@ -64,7 +64,7 @@ class DBALDriverError(DBALError):
     def execute_exception(cls, driver, exception, sql, params=None):
         message = "An exception occurred in driver '%s' while executing '%s'" % (driver.get_name(), sql)
         if params:
-            message += " with parameters " + str(params)
+            message += " with parameters " + str(list(params))
         return cls(message + ": %s." % exception)
 
 
