@@ -24,7 +24,7 @@ from __future__ import absolute_import, division, print_function, with_statement
 
 from abc import ABCMeta, abstractmethod
 
-from .exception import DBALTypesError
+from pydbal.exception import DBALTypesError
 
 
 class BaseType:

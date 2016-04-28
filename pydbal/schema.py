@@ -25,8 +25,8 @@ from __future__ import absolute_import, division, print_function, with_statement
 from abc import ABCMeta, abstractmethod
 from binascii import crc32
 
-from .types import BaseType
-from .cache import cached
+from pydbal.types import BaseType
+from pydbal.cache import cached
 
 
 class BaseAsset:

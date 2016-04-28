@@ -26,8 +26,8 @@ import re
 
 from abc import ABCMeta, abstractmethod
 
-from ..connection import Connection
-from ..exception import DBALPlatformError
+from pydbal.connection import Connection
+from pydbal.exception import DBALPlatformError
 
 
 class BasePlatform:

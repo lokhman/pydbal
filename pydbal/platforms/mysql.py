@@ -24,8 +24,8 @@ from __future__ import absolute_import, division, print_function, with_statement
 
 import itertools
 
-from . import BasePlatform
-from ..types import BaseType
+from pydbal.platforms import BasePlatform
+from pydbal.types import BaseType
 
 
 class MySQLPlatform(BasePlatform):

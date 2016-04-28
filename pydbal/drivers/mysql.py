@@ -25,9 +25,9 @@ from __future__ import absolute_import, division, print_function, with_statement
 import MySQLdb
 import MySQLdb.cursors
 
-from . import BaseDriver
-from ..exception import DBALDriverError
-from ..platforms.mysql import MySQLPlatform
+from pydbal.drivers import BaseDriver
+from pydbal.exception import DBALDriverError
+from pydbal.platforms.mysql import MySQLPlatform
 
 
 class MySQLDriver(BaseDriver):

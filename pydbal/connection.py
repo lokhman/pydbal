@@ -24,11 +24,11 @@ from __future__ import absolute_import, division, print_function, with_statement
 
 import logging
 
-from .drivers import BaseDriver
-from .statement import Statement
-from .schema import SchemaManager
-from .exception import DBALConnectionError
-from .builder import SQLBuilder, ExpressionBuilder
+from pydbal.drivers import BaseDriver
+from pydbal.statement import Statement
+from pydbal.schema import SchemaManager
+from pydbal.exception import DBALConnectionError
+from pydbal.builder import SQLBuilder, ExpressionBuilder
 
 
 class Connection:
@@ -109,7 +109,7 @@ class Connection:
     @staticmethod
     def cache_clear():
         """Clears module cache."""
-        from . import cache
+        from pydbal import cache
         cache.clear()
         del cache
 

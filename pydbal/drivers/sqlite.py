@@ -25,9 +25,9 @@ from __future__ import absolute_import, division, print_function, with_statement
 import sqlite3
 import warnings
 
-from . import BaseDriver
-from ..exception import DBALDriverError, DBALNotImplementedWarning
-from ..platforms.sqlite import SQLitePlatform
+from pydbal.drivers import BaseDriver
+from pydbal.exception import DBALDriverError, DBALNotImplementedWarning
+from pydbal.platforms.sqlite import SQLitePlatform
 
 
 class SQLiteDriver(BaseDriver):

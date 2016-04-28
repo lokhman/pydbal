@@ -26,7 +26,7 @@ import re
 
 from collections import namedtuple
 
-from .exception import DBALStatementError
+from pydbal.exception import DBALStatementError
 
 
 class Statement:

@@ -24,7 +24,7 @@ from __future__ import absolute_import, division, print_function, with_statement
 
 import copy
 
-from .exception import DBALBuilderError
+from pydbal.exception import DBALBuilderError
 
 
 class SQLBuilder:

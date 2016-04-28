@@ -25,11 +25,11 @@ from __future__ import absolute_import, division, print_function, with_statement
 import re
 import itertools
 
-from . import BasePlatform
-from ..cache import cached
-from ..types import BaseType
-from ..connection import Connection
-from ..exception import DBALPlatformError
+from pydbal.platforms import BasePlatform
+from pydbal.cache import cached
+from pydbal.types import BaseType
+from pydbal.connection import Connection
+from pydbal.exception import DBALPlatformError
 
 
 class SQLitePlatform(BasePlatform):
