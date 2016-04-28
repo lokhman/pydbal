@@ -29,7 +29,7 @@ except ImportError:
 
 kwargs = {}
 
-version = "0.5"
+version = "0.6"
 
 with open("README.rst") as f:
     kwargs["long_description"] = f.read()
@@ -41,7 +41,7 @@ if setuptools is not None:
 setup(
     name="pydbal",
     version=version,
-    packages=["pydbal"],
+    packages=["pydbal", "pydbal.drivers", "pydbal.platforms"],
     description="Database Abstraction Layer (DBAL) for Python 2.6+",
     author="Alexander Lokhman",
     author_email="alex.lokhman@gmail.com",
