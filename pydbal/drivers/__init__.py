@@ -30,7 +30,7 @@ class BaseDriver:
 
     _server_version_info = None
 
-    _sql_logger = None
+    _logger = None
     _platform = None
     _conn = None
 
@@ -41,19 +41,19 @@ class BaseDriver:
     def __del__(self):
         self.close()
 
-    def _log(self, sql, params=None):
-        sql_logger = self.get_sql_logger()
-        if sql_logger is not None:
+    def _log(self, log, *params):
+        logger = self.get_logger()
+        if logger is not None:
             if params:
-                sql += " " + str(list(params))
-            sql_logger.debug(sql)
+                log += " " + str(list(params))
+            logger.debug(log)
 
-    def get_sql_logger(self):
+    def get_logger(self):
         try:
             # 'getChild' property available in Python 2.7+
-            return self._sql_logger.getChild(self.get_name())
+            return self._logger.getChild(self.get_name())
         except AttributeError:
-            return self._sql_logger
+            return self._logger
 
     def get_platform(self):
         return self._platform

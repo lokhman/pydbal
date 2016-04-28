@@ -35,7 +35,7 @@ class SQLiteDriver(BaseDriver):
     _error = None
 
     def __init__(self, database, timeout=5.0, **params):
-        self._sql_logger = params.pop("sql_logger")
+        self._logger = params.pop("logger")
         self._platform = SQLitePlatform(self)
 
         auto_commit = params.pop("auto_commit")
@@ -84,7 +84,7 @@ class SQLiteDriver(BaseDriver):
 
     def execute(self, sql, *params):
         try:
-            self._log(sql, params)
+            self._log(sql, *params)
             self._error = None
             self._cursor = self._conn.execute(sql, params)
             return self.row_count()

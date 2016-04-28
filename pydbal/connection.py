@@ -57,22 +57,22 @@ class Connection:
 
     _instance_count = 0
 
-    def __init__(self, driver, auto_connect=True, auto_commit=True, sql_logger=None, **params):
+    def __init__(self, driver, auto_connect=True, auto_commit=True, logger=None, **params):
         """Initialises database connection.
 
         :param driver: database driver
         :param auto_connect: set connection auto (re)connect
         :param auto_commit: set connection auto commit
-        :param sql_logger: SQL logger
+        :param logger: driver logger
         :param params: database connection parameters
         """
         Connection._instance_count += 1
 
-        if not isinstance(sql_logger, logging.Logger):
-            sql_logger = self._get_default_sql_logger()
-        self._sql_logger = sql_logger
+        if not isinstance(logger, logging.Logger):
+            logger = self._get_default_logger()
+        self._logger = logger
 
-        params = dict(auto_commit=auto_commit, sql_logger=sql_logger, **params)
+        params = dict(auto_commit=auto_commit, logger=logger, **params)
         if isinstance(driver, BaseDriver):
             self._driver = driver
         else:
@@ -114,8 +114,8 @@ class Connection:
         del cache
 
     @staticmethod
-    def _get_default_sql_logger():
-        """Returns default SQL logger.
+    def _get_default_logger():
+        """Returns default driver logger.
 
         :return: logger instance
         :rtype: logging.Logger
@@ -134,13 +134,13 @@ class Connection:
         logger.addHandler(handler)
         return logger
 
-    def get_sql_logger(self):
-        """Returns connection SQL logger.
+    def get_logger(self):
+        """Returns connection driver logger.
 
         :return: logger instance
         :rtype: logging.Logger
         """
-        return self._sql_logger
+        return self._logger
 
     def get_driver(self):
         """Returns the DBAL driver instance.

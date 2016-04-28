@@ -35,7 +35,7 @@ class MySQLDriver(BaseDriver):
 
     def __init__(self, host, user=None, password=None, database=None, port=3306, timeout=0, charset="utf8",
                  timezone="+0:00", sql_mode="TRADITIONAL", **params):
-        self._sql_logger = params.pop("sql_logger")
+        self._logger = params.pop("logger")
         self._platform = MySQLPlatform(self)
 
         self._params = dict(
@@ -92,7 +92,7 @@ class MySQLDriver(BaseDriver):
     def execute(self, sql, *params):
         try:
             self._cursor = self._get_cursor()
-            self._log(sql, params)
+            self._log(sql, *params)
             return self._cursor.execute(sql, params)
         except Exception as ex:
             raise DBALDriverError.execute_exception(self, ex, sql, params)
