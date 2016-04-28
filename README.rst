@@ -30,7 +30,7 @@ desired parameters.
 
     from pydbal.connection import Connection
 
-    conn = Connection("mysql", host="localhost", user="root", database="mydb")
+    conn = Connection('mysql', host='localhost', user='root', database='mydb')
 
 pyDBAL currently supports the following drivers: ``mysql`` and
 ``sqlite``. You can create a custom driver by inheriting
