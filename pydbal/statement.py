@@ -113,10 +113,16 @@ class Statement:
         return replace
 
     def fetch(self, fetch_mode=None):
-        return next(self.iterate(fetch_mode))
+        try:
+            return next(self.iterate(fetch_mode))
+        except StopIteration:
+            return None
 
     def fetch_all(self, fetch_mode=None, column_index=0):
         return list(self.iterate(fetch_mode, column_index))
 
     def fetch_column(self, column_index=0):
-        return next(self.iterate(Statement.FETCH_COLUMN, column_index))
+        try:
+            return next(self.iterate(Statement.FETCH_COLUMN, column_index))
+        except StopIteration:
+            return None
