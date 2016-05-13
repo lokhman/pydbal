@@ -56,16 +56,24 @@ class DBALConnectionError(DBALError):
 
 
 class DBALDriverError(DBALError):
+    def __init__(self, *args, **kwargs):
+        self._driver_exception = kwargs.pop("exception")
+        args = ("%s: %s." % (args[0], self._driver_exception), ) + args[1:]
+        super(DBALDriverError, self).__init__(*args, **kwargs)
+
+    def get_driver_exception(self):
+        return self._driver_exception
+
     @classmethod
     def driver_exception(cls, driver, exception):
-        return cls("An exception occurred in driver '%s': %s." % (driver.get_name(), exception))
+        return cls("An exception occurred in driver '%s'" % driver.get_name(), exception=exception)
 
     @classmethod
     def execute_exception(cls, driver, exception, sql, params=None):
         message = "An exception occurred in driver '%s' while executing '%s'" % (driver.get_name(), sql)
         if params:
             message += " with parameters " + str(list(params))
-        return cls(message + ": %s." % exception)
+        return cls(message, exception=exception)
 
 
 class DBALPlatformError(DBALError):
