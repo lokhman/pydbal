@@ -34,7 +34,7 @@ class MySQLDriver(BaseDriver):
     _cursor = None
 
     def __init__(self, host, user=None, password=None, database=None, port=3306, timeout=0, charset="utf8",
-                 timezone="+0:00", sql_mode="TRADITIONAL", **params):
+                 timezone="SYSTEM", sql_mode="TRADITIONAL", **params):
         self._logger = params.pop("logger")
         self._platform = MySQLPlatform(self)
 
