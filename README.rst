@@ -115,11 +115,13 @@ pyDBAL supports transactional operations.
     try:
         # ... execute statements ...
         conn.commit()
+        return smth
     except:
         conn.rollback()
+        raise
 
     # same as the above
-    def trans():
+    def trans(conn):
         # ... execute statements ...
         return smth
     smth = conn.transaction(trans)
@@ -243,6 +245,55 @@ Internal database queries are cached with ``pydbal.cache`` mechanisms.
     # foreign keys
     table_foreign_keys = sm.get_table_foreign_keys('table')
     table_foreign_key_names = sm.get_table_foreign_key_names('table')
+
+
+Thread-safe Connection
+~~~~~~~~~~~~~~~~~~~~~~
+
+pyDBAL v0.10+ supports thread-safe connection functionality implemented in
+``pydbal.threading`` module.
+
+.. code-block:: python
+
+    from pydbal.threading import SafeConnection
+
+    conn = SafeConnection('mysql', host='localhost', user='root', database='mydb')
+
+``SafeConnection`` wrapper class maintains active connections in locked pool
+and provides helper methods for manipulating your data. Class implements method
+``locked()`` which should be passed to ``with`` statement. It generates
+isolated connection context, that can be used for sending non-trivial commands
+to the original ``pydbal.connection.Connection`` object.
+
+.. code-block:: python
+
+    # simple fetch generator
+    for row in conn.query('SELECT * FROM table'):
+        print(row)
+
+    # fetch one row
+    row = conn.fetch('SELECT * FROM table WHERE id = ?', id_)
+
+    # fetch all rows
+    rows = conn.fetch_all('SELECT * FROM table')
+
+    # fetch single value from column
+    count = conn.fetch_column('SELECT COUNT(*) FROM table')
+
+    # UPDATE or DELETE queries
+    affected_rows = conn.execute('UPDATE table SET column = ? WHERE id = ?', val1, id_)
+
+    # INSERT query with last inserted ID
+    with conn.locked() as _conn:
+        _conn.execute('INSERT INTO table VALUES (?)', [val1, val2, val3])
+        last_insert_id = _conn.last_insert_id()
+
+    # transaction callback
+    def trans(_conn):
+        # ... execute statements ...
+        return smth
+    smth = conn.transaction(trans)
+
 
 License
 -------
