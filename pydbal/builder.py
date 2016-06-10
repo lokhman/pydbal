@@ -138,18 +138,18 @@ class SQLBuilder:
 
     def select(self, select, *args):
         self._type = SQLBuilder.SELECT
-        return self._add("select", (select,) + args)
+        return self._add("select", (select, ) + args)
 
     def add_select(self, select, *args):
         self._type = SQLBuilder.SELECT
-        return self._add("select", (select,) + args, True)
+        return self._add("select", (select, ) + args, True)
 
     def from_(self, table, alias=None):
         return self._add("from", (table, alias), True)
 
     def insert(self, table):
         self._type = SQLBuilder.INSERT
-        return self._add("from", (table,))
+        return self._add("from", (table, ))
 
     def update(self, table, alias=None):
         self._type = SQLBuilder.UPDATE
@@ -177,7 +177,7 @@ class SQLBuilder:
         return self._add("set", key + " = " + value, True)
 
     def where(self, where, *args):
-        return self._add("where", CompositeExpression(CompositeExpression.TYPE_AND, *(where,) + args))
+        return self._add("where", CompositeExpression(CompositeExpression.TYPE_AND, *(where, ) + args))
 
     def and_where(self, where, *args):
         where = (where, ) + args
@@ -194,10 +194,10 @@ class SQLBuilder:
         return self._add("where", CompositeExpression(CompositeExpression.TYPE_OR, *where))
 
     def group_by(self, group_by, *args):
-        return self._add("group_by", (group_by,) + args)
+        return self._add("group_by", (group_by, ) + args)
 
     def add_group_by(self, group_by, *args):
-        return self._add("group_by", (group_by,) + args, True)
+        return self._add("group_by", (group_by, ) + args, True)
 
     def set_value(self, column, value):
         self._sql_parts["values"][column] = value
@@ -209,7 +209,7 @@ class SQLBuilder:
         return self
 
     def having(self, having, *args):
-        return self._add("having", CompositeExpression(CompositeExpression.TYPE_AND, *(having,) + args))
+        return self._add("having", CompositeExpression(CompositeExpression.TYPE_AND, *(having, ) + args))
 
     def and_having(self, having, *args):
         having = (having, ) + args

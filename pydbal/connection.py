@@ -57,17 +57,16 @@ class Connection:
 
     _instance_count = 0
 
-    def __init__(self, driver, auto_connect=True, auto_commit=True, logger=None, **params):
+    def __init__(self, driver, auto_connect=True, auto_commit=True, fetch_mode=FETCH_DICT, logger=None, **params):
         """Initialises database connection.
 
         :param driver: database driver
         :param auto_connect: set connection auto (re)connect
         :param auto_commit: set connection auto commit
+        :param fetch_mode: set default fetch mode
         :param logger: driver logger
         :param params: database connection parameters
         """
-        Connection._instance_count += 1
-
         if not isinstance(logger, logging.Logger):
             logger = self._get_default_logger()
         self._logger = logger
@@ -88,9 +87,9 @@ class Connection:
         self._schema_manager = SchemaManager(self)
 
         self._expr = ExpressionBuilder(self)
-        self._fetch_mode = Connection.FETCH_DICT
         self._auto_connect = auto_connect
         self._auto_commit = auto_commit
+        self._fetch_mode = fetch_mode
 
         self._transaction_nesting_level = 0
         self._transaction_isolation_level = None
@@ -99,6 +98,8 @@ class Connection:
 
         if auto_connect:
             self.connect()
+
+        Connection._instance_count += 1
 
     def __del__(self):
         """Closes connection on instance destroy."""
@@ -248,7 +249,7 @@ class Connection:
         self._fetch_mode = fetch_mode
 
     def query(self, sql, *args, **kwargs):
-        """Executes an SQL statement, returning a result set as a Statement object.
+        """Executes an SQL SELECT query, returning a result set as a Statement object.
 
         :param sql: query to execute
         :param args: parameters iterable
@@ -377,7 +378,7 @@ class Connection:
         If an exception occurs during execution of the function or transaction commit,
         the transaction is rolled back and the exception re-thrown.
 
-        :param callback: the function to execute in a transaction.
+        :param callback: the function to execute in a transaction
         :return: the value returned by the `callback`
         :raise: Exception
         """
@@ -386,9 +387,9 @@ class Connection:
             result = callback(self)
             self.commit()
             return result
-        except Exception as ex:
+        except:
             self.rollback()
-            raise ex
+            raise
 
     def is_auto_commit(self):
         """Returns the current auto-commit mode for this connection.
