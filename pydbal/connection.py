@@ -68,7 +68,7 @@ class Connection:
         :param params: database connection parameters
         """
         if not isinstance(logger, logging.Logger):
-            logger = self._get_default_logger()
+            logger = Connection.get_default_logger()
         self._logger = logger
 
         params = dict(auto_commit=auto_commit, logger=logger, **params)
@@ -115,7 +115,7 @@ class Connection:
         del cache
 
     @staticmethod
-    def _get_default_logger():
+    def get_default_logger():
         """Returns default driver logger.
 
         :return: logger instance
