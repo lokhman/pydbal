@@ -73,7 +73,7 @@ class SafeConnection:
 
     @contextmanager
     def locked(self):
-        """Context generator for `with` statement, which yields thread-safe connection.
+        """Context generator for `with` statement, yields thread-safe connection.
 
         :return: thread-safe connection
         :rtype: pydbal.connection.Connection
@@ -86,7 +86,7 @@ class SafeConnection:
             self._unlock(conn)
 
     def query(self, sql, *args, **kwargs):
-        """Executes an SQL SELECT query, returning rows generator.
+        """Executes an SQL SELECT query and returns rows generator.
 
         :param sql: query to execute
         :param args: parameters iterable
