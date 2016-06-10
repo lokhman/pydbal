@@ -29,7 +29,7 @@ except ImportError:
 
 kwargs = {}
 
-version = "0.9"
+version = "0.10"
 
 with open("README.rst") as f:
     kwargs["long_description"] = f.read()
