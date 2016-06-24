@@ -535,8 +535,8 @@ class Connection:
 
         sb = self.sql_builder().insert(table)
         for column, value in values.iteritems():
-            sb.set_value(column, sb.create_positional_parameter(value))
-        return sb.execute()
+            values[column] = sb.create_positional_parameter(value)
+        return sb.values(values).execute()
 
     def update(self, table, values, identifier):
         """Updates a table row with specified data by given identifier.

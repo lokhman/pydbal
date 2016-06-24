@@ -252,7 +252,7 @@ class SQLBuilder:
         if placeholder is None:
             placeholder = ":pyValue" + str(self._param_counter)
             self._param_counter += 1
-        self.set_parameter(placeholder[1:], value)
+        self.set_parameter(placeholder, value)
         return placeholder
 
     def create_positional_parameter(self, value):
