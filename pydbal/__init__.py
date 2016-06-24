@@ -22,5 +22,5 @@
 
 from __future__ import absolute_import, division, print_function, with_statement
 
-version = "0.11"
-version_info = (0, 11, 0, 0)
+version = "0.12"
+version_info = (0, 12, 0, 0)
